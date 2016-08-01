@@ -1,7 +1,9 @@
 function y = ItemCheck(url)
 %Description:This script is used to extract item ad information on Gumtree.
 %Author: Junxiang Zhu
-%Version: 1.0
+%Version: 1.1
+% compared with version 1.0, the interested areas are more extracted more
+% efficiently.
 %Date: 21-May-2016
 %Email:junxiang.zhu@curtin.edu.au
 if nargin ~= 1, error('Wrong input argument.'); end
@@ -21,17 +23,13 @@ result_title{i} = result_title{i}(23:end-7);% extract information needed
 end
 
 % extract price
-patern_price = '<div class="rs-ad-field rs-ad-price">\s*.*?</div>';
+patern_price = '<div class="j-ad-price.*?</div>';
 result_price = regexp(str,patern_price,'match');
 result_price = result_price';
 for i = 1:length(result_price)
-result_price{i} = regexprep(result_price{i},'\s{2,}','');%eliminate blank
-if length(result_price{i}) == 43
-    result_price{i} = '------';
-else
-    ind = strfind(result_price{i},'</');
-    result_price{i} = result_price{i}(119:ind(1)-1);   
-end
+kk = regexprep(result_price{i},'\s{2,}','');
+kk = regexprep(kk,'<.*?>','');
+result_price{i} = regexprep(kk,'\s','/');
 end
 
 %date
