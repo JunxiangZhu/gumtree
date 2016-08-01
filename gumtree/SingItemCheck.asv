@@ -1,0 +1,63 @@
+function y = SingItemCheck(str)
+%Description:This script is used to extract information of a single item
+% so plese input content between <li>...</li>. Attention single item
+%Author: Junxiang Zhu
+%Version: 1.1
+%Date: 26-May-2016
+%Email:junxiang.zhu@curtin.edu.au
+if nargin ~= 1, error('Wrong input argument.'); end
+
+% exatract title
+patern_title = '<span itemprop="name">\s*.*?</span>';
+result_title = char(regexp(str,patern_title,'match'));
+if ~isempty(result_title)
+    result_title = regexprep(result_title,'\s{2,}','');%eliminate blank
+    result_title = regexprep(result_title,'&#034;','"');%turn error into "
+    result_title = regexprep(result_title,'&#039;','?');%turn error into ?
+    result_title = regexprep(result_title,'&amp;','&');%turn error into &
+    result_title = char(result_title);% extract information needed
+    result_title = result_title(23:end-7);
+else
+    result_title={repmat('-',1,6)};
+end
+result_title = {result_title};
+
+% extract price
+patern_price = '<div class="j-ad-price.*?</div>';
+result_price = regexp(str,patern_price,'match')';
+result_price = regexprep(result_price,'\s{2,}','');%eliminate blank
+if ~isempty(result_price)
+    result_price = char(result_price);
+    result_price = regexprep(result_price,'<.*?>','');
+    result_price = regexprep(result_price,'\s','/');
+    result_price = {result_price};
+else
+    result_price = repmat('-',6);
+end
+
+%location (new version)
+patern_location = '<div class="ad-listing__location">.*?</div>';
+result_location = regexp(str,patern_location,'match')';
+result_location = char(result_location);
+result_location = regexprep(result_location,'\s{2,}',''); %eliminate continuous space
+if ~isempty(result_location)
+   result_location = regexprep(result_location,'<.*?>','');
+else
+    result_location = repmat('-',6);
+end
+
+% link for each item
+patern_link = '<a itemprop="url".*?">';
+result_link = regexp(str,patern_link,'match');
+result_link = unique(result_link,'stable');
+result_link = result_link(1)
+ind1 = strfind(result_link,'"/');
+result_link = ['http://www.gumtree.com.au' result_link(ind1+1:end-2)];
+result_link = {result_link};
+
+%
+result = [result_title,result_price,result_location,result_link];
+
+if nargout==1, y=result; elseif nargout==0, disp(result); end
+
+end
